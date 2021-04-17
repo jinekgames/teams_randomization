@@ -1,9 +1,11 @@
 ﻿
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <random>
+#include "conio.h"
 
 
 
@@ -35,14 +37,26 @@ int main() {
 
     vector<string> playerList;
     if (inputMode) {
-        
-        cout << "enter input filename\n";
-        string filename;
-        cin >> filename;
 
-        ifstream fin(filename.c_str());
+        ifstream fin;
+
+        do {
+
+            cout << "enter input filename (without \".txt\"\n";
+            string filename;
+            cin >> filename;
+            filename += ".txt";
+
+            fin.open(filename.c_str(), ios::in);
+
+            if (!fin.is_open()) {
+                cout << "\nbad file\n\n";
+            }
+
+        } while (!fin.is_open());
 
         input(fin, playerList);
+        fin.close();
 
     } else {
 
@@ -65,8 +79,11 @@ int main() {
     mt19937 seed{ random_device{}() };
     uniform_real_distribution<double> rand{ 0.0, 1.0  * teamsNumber };
 
+    ostringstream oss;
     bool res = false;
     while (!res) {
+
+        oss.str("");
 
         for (auto index = 0; index < playersInTeam.size(); ++index) {
             playersInTeam[index] = 0u;
@@ -80,9 +97,9 @@ int main() {
 
             playersInTeam[selectedTeam] += 1;
 
-            cout.width(20);
-            cout.fill(' ');
-            cout << i << "\t" << selectedTeam + 1 << "\n\n";
+            oss.width(20);
+            oss.fill(' ');
+            oss << i << "\t" << selectedTeam + 1 << "\n\n";
 
         }
 
@@ -95,7 +112,17 @@ int main() {
     }
 
 
-    cin.get();
+
+    cout << oss.str();
+    ofstream fout("teams.txt", ios::out);
+    if (!fout.is_open()) cout << "bad file";
+    fout << oss.str();
+    fout.close();
+
+    cout << "results were written to file \"teams.txt\"\npress Enter to close\n";
+
+
+    _getch();
 
     return 0;
 
